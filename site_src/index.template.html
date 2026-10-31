@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nobel Atlas — an interactive reading of 119 years of Nobel Prizes</title>
+<meta name="description" content="Interactive analysis of 950 Nobel laureates and 597 prizes (1901–2019): trends over time, geography and brain drain, who wins, and a full laureate explorer.">
+<meta name="theme-color" content="#f7f5f0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23c9a24a'/><text y='68' x='50' font-size='54' text-anchor='middle' font-family='Georgia'>N</text></svg>">
+<style>/*__CSS__*/</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <span class="medal" aria-hidden="true">N</span>
+      <span>Nobel Atlas<small>Data explorer</small></span>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" data-tab="overview" aria-selected="true">Overview</button>
+      <button role="tab" data-tab="time" aria-selected="false">Time &amp; trends</button>
+      <button role="tab" data-tab="geo" aria-selected="false">Geography</button>
+      <button role="tab" data-tab="who" aria-selected="false">Who wins</button>
+      <button role="tab" data-tab="people" aria-selected="false">Laureates</button>
+      <button role="tab" data-tab="explore" aria-selected="false">Explore</button>
+    </nav>
+    <button class="icon-btn" id="theme" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+  </div>
+</div>
+
+<header class="hero wrap">
+  <div class="eyebrow">1901 – 2019 · Nobel Prize open data</div>
+  <h1>Who wins the Nobel Prize — and what the record actually shows</h1>
+  <p class="lede">
+    119 years, 950 laureates, 597 prizes. This is a guided, interactive reading of the full
+    Nobel Prize record: how awards grew, how science became collaborative, where laureates are
+    born versus where they work, and who still gets left out. Every chart is filterable, and
+    every number is computed live from the same cleaned dataset.
+  </p>
+  <div class="hero-stats">
+    <div><b id="hs-rows">950</b><span>Laureate records</span></div>
+    <div><b id="hs-prizes">597</b><span>Prizes awarded</span></div>
+    <div><b id="hs-countries">82</b><span>Birth countries</span></div>
+    <div><b id="hs-years">1901–2019</b><span>Years covered</span></div>
+  </div>
+  <div class="hero-cta">
+    <button class="btn primary" id="hero-ask" type="button">💬 Ask the Nobel assistant</button>
+    <span>or explore the charts below — every one is clickable</span>
+  </div>
+</header>
+
+<section class="filters wrap" aria-label="Filters">
+  <div class="f-top">
+    <h2>Filters</h2>
+    <span class="live" id="fcount">950 of 950 records</span>
+    <button class="btn ghost" id="reset" type="button">↺ Reset all</button>
+  </div>
+  <div class="f-grid">
+    <div class="f-field c2">
+      <label for="y0">Award years <b id="yrLabel">1901 – 2019</b></label>
+      <div class="range-row">
+        <input type="range" id="y0" min="1901" max="2019" step="1" value="1901" aria-label="From year">
+        <input type="range" id="y1" min="1901" max="2019" step="1" value="2019" aria-label="To year">
+      </div>
+    </div>
+    <div class="f-field c4">
+      <label>Category</label>
+      <div class="chips" id="chips-cat"></div>
+    </div>
+    <div class="f-field c2">
+      <label>Winner type</label>
+      <div class="chips" id="chips-type"></div>
+    </div>
+    <div class="f-field c1">
+      <label for="sel-cont">Birth continent</label>
+      <select id="sel-cont"><option value="">All continents</option></select>
+    </div>
+    <div class="f-field c1">
+      <label for="sel-country">Birth country</label>
+      <select id="sel-country"><option value="">All countries</option></select>
+    </div>
+    <div class="f-field c2">
+      <label for="q">Search names, institutions, citations</label>
+      <input type="search" id="q" placeholder="e.g. Curie, Cambridge, relativity…" autocomplete="off">
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <!-- ============================ OVERVIEW ============================ -->
+  <section class="tab active" id="tab-overview" role="tabpanel" aria-label="Overview">
+    <div class="kpis" id="kpis"></div>
+
+    <div class="sec-head">
+      <h2>The shape of the record</h2>
+      <p>Start here: how many prizes are handed out each year, which fields dominate, and where laureates come from. Click any bar or slice to filter the whole page.</p>
+    </div>
+
+    <div class="grid g21">
+      <article class="card">
+        <header>
+          <h3>Awards per year, and the running total</h3>
+          <p>Bars are prizes awarded in a year; the line is the cumulative count. Gaps are years when a prize was not awarded.</p>
+        </header>
+        <div class="chart" id="c-year" style="height:330px"></div>
+        <p class="takeaway" id="tk-year"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Winner type</h3>
+          <p>Individuals versus organisations. Organisations only ever win Peace — and almost never anything else.</p>
+        </header>
+        <div class="chart" id="c-type" style="height:330px"></div>
+        <p class="takeaway" id="tk-type"></p>
+      </article>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <article class="card">
+        <header>
+          <h3>Laureates by category</h3>
+          <p>Medicine and Physics are the largest fields; Economic Sciences is the newest (from 1969).</p>
+        </header>
+        <div class="chart" id="c-cat" style="height:300px"></div>
+        <p class="takeaway" id="tk-cat"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Top birth countries</h3>
+          <p>Modern country borders are used. Click a country to focus the whole page on it.</p>
+        </header>
+        <div class="chart" id="c-country" style="height:300px"></div>
+        <p class="takeaway" id="tk-country"></p>
+      </article>
+    </div>
+
+    <div class="sec-head">
+      <h2>Key findings at a glance</h2>
+      <p>Each line is recalculated from the current filter selection.</p>
+    </div>
+    <ul class="insights" id="ov-insights"></ul>
+  </section>
+
+  <!-- ============================ TIME ============================ -->
+  <section class="tab" id="tab-time" role="tabpanel" aria-label="Time and trends">
+    <div class="sec-head">
+      <h2>How the prize changed over 119 years</h2>
+      <p>More prizes, more collaborators, older laureates. The three trends below are the backbone of the whole dataset.</p>
+    </div>
+
+    <div class="grid g2">
+      <article class="card">
+        <header>
+          <h3>Prizes per decade</h3>
+          <p>Total prizes handed out in each ten-year block. The Nobel statutes allow up to three laureates per prize.</p>
+        </header>
+        <div class="chart" id="c-decade" style="height:300px"></div>
+        <p class="takeaway" id="tk-decade"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Single winner vs collaborative team</h3>
+          <p>Share of laureates who shared their prize with at least one other person.</p>
+        </header>
+        <div class="chart" id="c-collab" style="height:300px"></div>
+        <p class="takeaway" id="tk-collab"></p>
+      </article>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <article class="card">
+        <header>
+          <h3>Prize dilution: 1/1 → 1/3</h3>
+          <p>How the prize money is split. A “1/1” is a sole winner; “1/2” and “1/3” are shared portions.</p>
+        </header>
+        <div class="chart" id="c-share" style="height:300px"></div>
+        <p class="takeaway" id="tk-share"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Average age at award, by field</h3>
+          <p>Mean age of laureates per decade. Click a category chip above to isolate a field.</p>
+        </header>
+        <div class="chart" id="c-agetrend" style="height:300px"></div>
+        <p class="takeaway" id="tk-agetrend"></p>
+      </article>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <article class="card">
+        <header>
+          <h3>Distribution of ages</h3>
+          <p>Every laureate with a known birth year. The dashed line marks the median.</p>
+        </header>
+        <div class="chart" id="c-agehist" style="height:300px"></div>
+        <p class="takeaway" id="tk-agehist"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>What the prize was worth</h3>
+          <p>Average prize value per decade, adjusted for inflation (USD). Values are per prize, not per laureate.</p>
+        </header>
+        <div class="chart" id="c-prize" style="height:300px"></div>
+        <p class="takeaway" id="tk-prize"></p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================ GEOGRAPHY ============================ -->
+  <section class="tab" id="tab-geo" role="tabpanel" aria-label="Geography">
+    <div class="sec-head">
+      <h2>Geography, and the brain drain</h2>
+      <p>Where laureates are born is not where they work. Comparing birth country with the country of their institution at the time of the award is the simplest measure of scientific migration.</p>
+    </div>
+
+    <div class="grid g2">
+      <article class="card" style="grid-column:1/-1">
+        <header>
+          <h3>Birth countries on the map</h3>
+          <p>Darker means more laureates born there. Historical states (USSR, Prussia, Persia…) are mapped to modern borders. Click a country to filter the whole page.</p>
+        </header>
+        <div class="chart" id="c-map"></div>
+        <div class="legend" id="map-legend"></div>
+      </article>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <article class="card">
+        <header>
+          <h3>Top 15 birth countries</h3>
+          <p>Click a bar to filter by that country.</p>
+        </header>
+        <div class="chart" id="c-geo-top" style="height:430px"></div>
+        <p class="takeaway" id="tk-geo-top"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Where the institutions are</h3>
+          <p>Affiliation countries at the time of the award — the pull side of the brain drain.</p>
+        </header>
+        <div class="chart" id="c-aff" style="height:430px"></div>
+        <p class="takeaway" id="tk-aff"></p>
+      </article>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <article class="card">
+        <header>
+          <h3>Birth country × category</h3>
+          <p>Cells count laureates. The United States is broad; smaller countries specialise.</p>
+        </header>
+        <div class="chart" id="c-countrycat" style="height:420px"></div>
+        <p class="takeaway" id="tk-countrycat"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Birth country × decade</h3>
+          <p>When each country’s laureates won. Watch the United States rise after 1940.</p>
+        </header>
+        <div class="chart" id="c-countrydec" style="height:420px"></div>
+        <p class="takeaway" id="tk-countrydec"></p>
+      </article>
+    </div>
+
+    <div class="sec-head">
+      <h2>Brain drain</h2>
+      <p>“Migrant” means the laureate’s birth country differs from the country of their listed affiliation at the time of the award. This is available for laureates with an institutional affiliation (697 of 950 records).</p>
+    </div>
+
+    <div class="grid g12">
+      <article class="card">
+        <header>
+          <h3>Net gain and loss of talent</h3>
+          <p>Top countries by net laureates gained (affiliation minus birth).</p>
+        </header>
+        <div class="chart" id="c-net" style="height:330px"></div>
+        <p class="takeaway" id="tk-net"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Born there vs working there</h3>
+          <p>Grey: laureates born in the country. Blue: laureates affiliated with an institution there.</p>
+        </header>
+        <div class="chart" id="c-drain" style="height:330px"></div>
+        <p class="takeaway" id="tk-drain"></p>
+      </article>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <article class="card">
+        <header>
+          <h3>Migration rate by decade</h3>
+          <p>Share of laureates (with a known affiliation) working outside their birth country.</p>
+        </header>
+        <div class="chart" id="c-mig" style="height:300px"></div>
+        <p class="takeaway" id="tk-mig"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Busiest migration corridors</h3>
+          <p>Birth country → affiliation country, for laureates who worked abroad. Bars show how many took each route.</p>
+        </header>
+        <div class="chart" id="c-corridors" style="height:300px"></div>
+        <p class="takeaway" id="tk-corridors"></p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================ WHO WINS ============================ -->
+  <section class="tab" id="tab-who" role="tabpanel" aria-label="Who wins">
+    <div class="sec-head">
+      <h2>Who wins, and who is still missing</h2>
+      <p>Gender, age and institutions. Women are 5.7% of individual laureates; the gap is largest in Physics, Chemistry and Economics.</p>
+    </div>
+
+    <div class="grid g2">
+      <article class="card">
+        <header>
+          <h3>Category × winner type</h3>
+          <p>Organisations cluster entirely in Peace. Literature and Peace have the most women.</p>
+        </header>
+        <div class="chart" id="c-cattype" style="height:330px"></div>
+        <p class="takeaway" id="tk-cattype"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Women among laureates, by decade</h3>
+          <p>Share of individual laureates who are women, per ten-year block.</p>
+        </header>
+        <div class="chart" id="c-female" style="height:330px"></div>
+        <p class="takeaway" id="tk-female"></p>
+      </article>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <article class="card">
+        <header>
+          <h3>Age at award, by category</h3>
+          <p>Box = middle 50% of laureates, line = median, dots = outliers. Economics laureates are the oldest on average.</p>
+        </header>
+        <div class="chart" id="c-agebox" style="height:360px"></div>
+        <p class="takeaway" id="tk-agebox"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Age summary</h3>
+          <p>Mean, median and range for each field in the current selection.</p>
+        </header>
+        <div class="table-wrap" style="max-height:360px">
+          <table id="age-table"><thead><tr>
+            <th>Category</th><th class="num">N</th><th class="num">Mean</th><th class="num">Median</th><th class="num">Youngest</th><th class="num">Oldest</th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+      </article>
+    </div>
+
+    <div class="grid g21" style="margin-top:18px">
+      <article class="card">
+        <header>
+          <h3>Institutions that host the most laureates</h3>
+          <p>Based on the affiliation recorded at the time of the award.</p>
+        </header>
+        <div class="chart" id="c-inst" style="height:430px"></div>
+        <p class="takeaway" id="tk-inst"></p>
+      </article>
+      <article class="card">
+        <header>
+          <h3>Repeat winners</h3>
+          <p>Winning twice is rare — Marie Curie and Linus Pauling did it in different fields.</p>
+        </header>
+        <ul class="insights" id="repeat"></ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================ PEOPLE ============================ -->
+  <section class="tab" id="tab-people" role="tabpanel" aria-label="Laureates">
+    <div class="sec-head">
+      <h2>Laureate explorer</h2>
+      <p>Every record in the current selection. Sort by any column, click a row to open the full profile.</p>
+    </div>
+    <article class="card">
+      <div class="row" style="margin-bottom:12px">
+        <span class="statline" style="margin:0"><b id="l-count">0</b> records</span>
+        <span style="flex:1"></span>
+        <button class="btn" id="l-csv" type="button" style="display: none;">⬇ Download filtered CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table id="l-table">
+          <thead><tr>
+            <th data-key="n">Name <span class="arrow"></span></th>
+            <th data-key="y" class="num">Year <span class="arrow"></span></th>
+            <th data-key="c">Category <span class="arrow"></span></th>
+            <th data-key="t">Type <span class="arrow"></span></th>
+            <th data-key="age" class="num">Age <span class="arrow"></span></th>
+            <th data-key="bc">Born in <span class="arrow"></span></th>
+            <th data-key="inst">Institution <span class="arrow"></span></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <button class="btn" id="l-prev" type="button">← Prev</button>
+        <button class="btn" id="l-next" type="button">Next →</button>
+        <span class="spacer"></span>
+        <span id="l-range"></span>
+        <select id="l-per" style="width:auto;min-height:30px;padding:4px 8px">
+          <option value="25">25 / page</option>
+          <option value="50">50 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============================ EXPLORE ============================ -->
+  <section class="tab" id="tab-explore" role="tabpanel" aria-label="Explore">
+    <div class="sec-head">
+      <h2>Build your own view</h2>
+      <p>Pick an axis, a metric and a chart type. The table underneath follows the same selection, so you can copy the numbers out.</p>
+    </div>
+
+    <article class="card">
+      <div class="controls">
+        <div class="f-field">
+          <label for="x-sel">Group by</label>
+          <select id="x-sel">
+            <option value="y">Award year</option>
+            <option value="decade">Decade</option>
+            <option value="c" selected>Category</option>
+            <option value="t">Winner type</option>
+            <option value="bct">Birth continent</option>
+            <option value="bc">Birth country</option>
+            <option value="ac">Affiliation country</option>
+            <option value="inst">Institution</option>
+            <option value="p">Prize share</option>
+          </select>
+        </div>
+        <div class="f-field">
+          <label for="y-sel">Metric</label>
+          <select id="y-sel">
+            <option value="count" selected>Number of laureates</option>
+            <option value="meanAge">Mean age</option>
+            <option value="medianAge">Median age</option>
+            <option value="sumPrize">Total prize value (adjusted)</option>
+            <option value="meanPrize">Mean prize value (adjusted)</option>
+            <option value="femaleShare">Share of women (%)</option>
+          </select>
+        </div>
+        <div class="f-field">
+          <label for="type-sel">Chart type</label>
+          <select id="type-sel">
+            <option value="hbar" selected>Horizontal bars</option>
+            <option value="vbar">Vertical bars</option>
+            <option value="line">Line</option>
+            <option value="area">Area</option>
+            <option value="donut">Donut</option>
+          </select>
+        </div>
+        <div class="f-field">
+          <label for="topn">Show top <b id="topn-val">15</b></label>
+          <input type="range" id="topn" min="3" max="40" value="15">
+        </div>
+      </div>
+      <div class="chart" id="c-build" style="height:430px"></div>
+      <p class="takeaway" id="tk-build"></p>
+    </article>
+
+    <div class="sec-head">
+      <h2>Data table</h2>
+      <p>Choose the columns you want, then download. All values reflect the filters at the top of the page.</p>
+    </div>
+    <article class="card">
+      <div class="row" style="margin-bottom:12px">
+        <div class="chips" id="col-chips"></div>
+      </div>
+      <div class="table-wrap">
+        <table id="build-table"><thead></thead><tbody></tbody></table>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" id="dl-csv" type="button">⬇ Download this table (CSV)</button>
+        <span class="statline" style="margin:0" id="build-count"></span>
+      </div>
+    </article>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <h4>About this page</h4>
+      <p>
+        A single-file interactive report built from the Nobel Prize open dataset (1901–2019), the same
+        data used in the accompanying notebook analysis. Everything runs in your browser: no server,
+        no tracking, no external libraries.
+      </p>
+    </div>
+    <div>
+      <h4>How the data was cleaned</h4>
+      <ul>
+        <li>Organisations had no gender in the raw data; they are labelled <em>Organization</em>, not left blank.</li>
+        <li>Age = award year − birth year, parsed manually because many dates use <code>00-00</code>.</li>
+        <li>Historical countries (USSR, Prussia, Persia, British India…) mapped to modern names.</li>
+        <li>Institution and affiliation country are parsed from the affiliation string.</li>
+        <li>Prize values use the inflation-adjusted USD column.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Read with care</h4>
+      <ul>
+        <li>Affiliation is missing for 253 of 950 records, so migration rates cover 697 records only.</li>
+        <li>Birth country is missing for 27 records (mostly organisations).</li>
+        <li>Country borders are modern, so pre-1991 laureates are re-attributed.</li>
+        <li>“Women” is based on the recorded gender field; organisations are excluded from that share.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap fine">
+    Data: Nobel Prize API via the public laureates dataset · Analysis and design: Nobel Atlas ·
+    Built as a standalone HTML file — works offline.
+  </div>
+</footer>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<!-- ============================ CHAT ASSISTANT ============================ -->
+<button class="chat-fab" id="chat-fab" type="button" aria-label="Open the Nobel assistant">
+  <span class="chat-fab-ico" aria-hidden="true">✦</span>
+  <span class="chat-fab-txt">Ask about the Nobel Prize</span>
+</button>
+
+<section class="chat" id="chat" aria-hidden="true" aria-label="Nobel assistant">
+  <header class="chat-head">
+    <div class="chat-id">
+      <span class="chat-avatar" aria-hidden="true">N</span>
+      <div>
+        <b>Nobel Assistant</b>
+        <small><span class="chat-dot"></span> Answers from this dataset</small>
+      </div>
+    </div>
+    <button class="icon-btn" id="chat-close" type="button" aria-label="Close assistant">✕</button>
+  </header>
+
+  <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
+
+  <div class="chat-chips" id="chat-chips"></div>
+
+  <form class="chat-form" id="chat-form" autocomplete="off">
+    <input id="chat-input" type="text" placeholder="Ask about a laureate, year, country…" aria-label="Your question" maxlength="200">
+    <button class="chat-send" type="submit" aria-label="Send question">↑</button>
+  </form>
+  <label class="chat-foot">
+    <input type="checkbox" id="chat-filter">
+    <span>Answer using only my current filters</span>
+  </label>
+</section>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-bg" data-close="1"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="icon-btn modal-close" id="modal-close" aria-label="Close">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>/*__DATA__*/</script>
+<script>/*__APP__*/</script>
+</body>
+</html>
